@@ -1,26 +1,26 @@
-﻿using Censored.Helpers;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows;
 using System.Windows.Interop;
-using Point = System.Drawing.Point;
+using System.Windows.Forms;
+using Censored.Helpers;
 using Size = System.Drawing.Size;
+using Point = System.Drawing.Point;
 
 namespace Censored
 {
     public partial class MainWindow : Window
     {
-        private Timer _timer;
+        private System.Windows.Forms.Timer _timer;
+        private Graphics _graphics;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Установка размеров окна на весь экран
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
             this.Width = screenWidth;
@@ -34,17 +34,19 @@ namespace Censored
             base.OnSourceInitialized(e);
             var hwnd = new WindowInteropHelper(this).Handle;
             WindowsAPI.SetWindowExTransparent(hwnd);
+
+            _graphics = Graphics.FromHwnd(IntPtr.Zero);
         }
 
         private void InitializeTimer()
         {
-            _timer = new Timer(5000); // Timer Interval
-            _timer.Elapsed += OnTimedEvent;
-            _timer.AutoReset = true;
-            _timer.Enabled = true;
+            _timer = new System.Windows.Forms.Timer();
+            _timer.Interval = 30; // 30 milliseconds (approx. 33 fps)
+            _timer.Tick += OnTimedEvent;
+            _timer.Start();
         }
 
-        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private void OnTimedEvent(Object source, EventArgs e)
         {
             CaptureAndApplyMosaic();
         }
@@ -58,18 +60,9 @@ namespace Censored
             int startY = centerY - mosaicSize / 2;
 
             Bitmap originalScreenshot = CaptureScreenArea(startX, startY, mosaicSize, mosaicSize);
-
-            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string fileNameOriginal = Path.Combine(desktopPath, $"original_{DateTime.Now:yyyyMMdd_HHmmss}.png");
-            string fileNameMosaic = Path.Combine(desktopPath, $"mosaic_{DateTime.Now:yyyyMMdd_HHmmss}.png");
-
-            originalScreenshot.Save(fileNameOriginal, ImageFormat.Png);
-
             Bitmap mosaicBitmap = ApplyMosaic(originalScreenshot, 10); // Mosaic Cell Size
-            mosaicBitmap.Save(fileNameMosaic, ImageFormat.Png);
 
-            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
-            graphics.DrawImage(mosaicBitmap, new Point(startX, startY));
+            _graphics.DrawImage(mosaicBitmap, new Point(startX, startY));
         }
 
         private Bitmap CaptureScreenArea(int startX, int startY, int width, int height)
