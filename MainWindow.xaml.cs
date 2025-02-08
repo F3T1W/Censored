@@ -1,14 +1,11 @@
-﻿using System;
+﻿using Censored.Helpers;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Timers;
 using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Forms;
-using Censored.Helpers;
-using Size = System.Drawing.Size;
 using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace Censored
 {
@@ -23,8 +20,8 @@ namespace Censored
 
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
-            this.Width = screenWidth;
-            this.Height = screenHeight;
+            Width = screenWidth;
+            Height = screenHeight;
 
             InitializeTimer();
         }
@@ -40,8 +37,10 @@ namespace Censored
 
         private void InitializeTimer()
         {
-            _timer = new System.Windows.Forms.Timer();
-            _timer.Interval = 30; // 30 milliseconds (approx. 33 fps)
+            _timer = new System.Windows.Forms.Timer
+            {
+                Interval = 30 // 30 milliseconds (approx. 33 fps)
+            };
             _timer.Tick += OnTimedEvent;
             _timer.Start();
         }
