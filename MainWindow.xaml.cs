@@ -23,7 +23,7 @@ namespace Censored
             Width = screenWidth;
             Height = screenHeight;
 
-            InitializeTimer();
+            //InitializeTimer();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
